@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hochzeit">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Hochzeitsplaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&amp;family=DM+Sans:wght@400;500;600&amp;display=swap">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F5F5F1; --surface:#FFFFFF; --ink:#1E2721; --muted:#5C665F; --line:#DCE0D9;
+  --accent:#46614F; --on-accent:#FFFFFF; --tint:#E3EAE2; --tint-ink:#2F4536;
+  --warm:#C98B7B; --warm-tint:#F4E7E2; --warm-ink:#8A4A39;
+  --neutral-tint:#ECEDEA; --neutral-ink:#4A524C; --scrim:rgba(20,26,22,.42);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151A17; --surface:#1F2622; --ink:#ECEFEA; --muted:#A3ADA6; --line:#2E3731;
+    --accent:#8FB79C; --on-accent:#10201A; --tint:#2A3A30; --tint-ink:#BFE0CB;
+    --warm:#D49A8A; --warm-tint:#3A2925; --warm-ink:#F0B9AA;
+    --neutral-tint:#2A302C; --neutral-ink:#C4CCC6; --scrim:rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151A17; --surface:#1F2622; --ink:#ECEFEA; --muted:#A3ADA6; --line:#2E3731;
+  --accent:#8FB79C; --on-accent:#10201A; --tint:#2A3A30; --tint-ink:#BFE0CB;
+  --warm:#D49A8A; --warm-tint:#3A2925; --warm-ink:#F0B9AA;
+  --neutral-tint:#2A302C; --neutral-ink:#C4CCC6; --scrim:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+body{
+  margin:0;height:100%;display:flex;flex-direction:column;max-width:560px;margin-inline:auto;
+  background:var(--bg);color:var(--ink);
+  font:400 16px/1.4 'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2{margin:0;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 28px;display:flex;flex-direction:column;gap:18px}
+main>*{flex-shrink:0}
+
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.hdr h1{font-size:36px;line-height:1.05}
+.sub{font-size:14px;color:var(--muted);margin-top:4px}
+.hdr-actions{display:flex;gap:8px}
+.icon-btn{width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+
+.hero{background:var(--accent);color:var(--on-accent);border-radius:24px;padding:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;border:none;text-align:left;width:100%}
+.hero-label{font-size:14px;font-weight:500}
+.hero-num{display:flex;align-items:baseline;gap:8px}
+.hero-num b{font-family:'Cormorant Garamond',Georgia,serif;font-size:72px;font-weight:600;line-height:.95}
+.hero-num span{font-size:18px;font-weight:500}
+.hero-side{font-size:14px;text-align:right}
+.hero-empty{flex-direction:column;align-items:flex-start;justify-content:center;gap:6px}
+.hero-cta{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;line-height:1.1}
+.hero-col{flex-direction:column;align-items:stretch}
+.hero-big{font-family:'Cormorant Garamond',Georgia,serif;font-size:48px;font-weight:600;line-height:1}
+.hero-warn{background:var(--warm-tint);color:var(--warm-ink)}
+.hero .bar{background:rgba(255,255,255,.28)}
+.hero .bar>i{background:var(--on-accent)}
+.hero-warn .bar{background:rgba(138,74,57,.22)}
+.hero-warn .bar>i{background:var(--warm-ink)}
+:root[data-theme="dark"] .hero .bar{background:rgba(16,32,26,.28)}
+.hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:13px}
+.hero-stats b{display:block;font-size:17px;font-weight:600}
+
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;text-align:left;min-height:88px}
+.tile span{font-size:13px;color:var(--muted);font-weight:500}
+.tile b{font-size:22px;font-weight:600}
+.tile b small{font-size:13px;font-weight:500;color:var(--muted)}
+
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.bar.over>i{background:var(--warm)}
+
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.sec-head h2{font-size:24px}
+.sec-head span,.link-btn{font-size:13px;color:var(--muted)}
+.link-btn{background:none;border:none;padding:12px 0;font-weight:600;color:var(--accent)}
+
+.list{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.row{display:flex;align-items:center;gap:4px;padding:2px 12px 2px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row-main{flex:1;min-width:0;background:none;border:none;text-align:left;padding:10px 8px;min-height:52px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.row-title{font-size:15px;font-weight:500;overflow-wrap:anywhere}
+.row-title.done{color:var(--muted);text-decoration:line-through}
+.row-meta{font-size:12px;color:var(--muted)}
+.row-amt{font-size:14px;font-weight:600;white-space:nowrap}
+.check{width:44px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.check input{width:22px;height:22px;margin:0;accent-color:var(--accent);cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:21px;background:var(--tint);color:var(--tint-ink);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;margin-left:10px}
+.cat{display:block;width:100%;background:none;border:none;border-bottom:1px solid var(--line);text-align:left;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.cat:last-child{border-bottom:none}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.cat-top b{font-size:14px;font-weight:600;white-space:nowrap}
+.cat-top b small{font-weight:400;color:var(--muted);font-size:14px}
+.cat-note{font-size:12px;color:var(--warm-ink)}
+
+.pill{border:none;border-radius:16px;padding:10px 14px;font-size:12px;font-weight:600;flex-shrink:0}
+.pill.yes{background:var(--tint);color:var(--tint-ink)}
+.pill.open{background:var(--warm-tint);color:var(--warm-ink)}
+.pill.no{background:var(--neutral-tint);color:var(--neutral-ink)}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;border-radius:14px;background:var(--neutral-tint)}
+.seg button{min-height:48px;border:none;border-radius:10px;background:transparent;font-size:13px;font-weight:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.seg button small{font-size:11px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);font-weight:600}
+
+.search{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.search input{flex:1;min-width:0;border:none;outline:none;background:transparent;font:400 16px 'DM Sans',system-ui,sans-serif;color:var(--ink)}
+.search:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+
+.empty{padding:26px 18px;text-align:center;color:var(--muted);font-size:14px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.notice{background:var(--warm-tint);color:var(--warm-ink);border-radius:14px;padding:12px 14px;font-size:13px}
+
+.btn{min-height:50px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:600;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.danger{background:var(--warm-tint);color:var(--warm-ink);border-color:transparent}
+.btn.block{width:100%}
+
+nav{display:flex;justify-content:space-around;padding:6px 8px 10px;border-top:1px solid var(--line);background:var(--surface)}
+nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px;min-height:52px;padding:6px 4px 2px;font-size:11px;font-weight:500;color:var(--muted)}
+nav button[aria-current="page"]{color:var(--accent);font-weight:600}
+
+.sheet-root{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet-backdrop{position:absolute;inset:0;background:var(--scrim)}
+.sheet{position:relative;width:100%;max-width:560px;max-height:92%;overflow-y:auto;background:var(--surface);color:var(--ink);border-radius:24px 24px 0 0;padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sheet-head h2{font-size:26px}
+.sheet-intro{margin:0;font-size:14px;color:var(--muted)}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.field input,.field select{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);padding:0 14px;font:400 16px 'DM Sans',system-ui,sans-serif}
+.field input[type="date"]{min-width:0}
+.err{margin:0;min-height:0;font-size:13px;color:var(--warm-ink);font-weight:500}
+.err:empty{display:none}
+.sheet-actions{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+<main id="main" aria-live="polite"></main>
+<nav id="nav" aria-label="Hauptnavigation"></nav>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Helfer ---------- */
+var KEY = 'hochzeitsplaner-v1';
+var uid = function(){ return Math.random().toString(36).slice(2, 9); };
+var esc = function(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+};
+var $ = function(s){ return document.querySelector(s); };
+var money = function(n){ return Math.round(n || 0).toLocaleString('de-CH'); };
+var num = function(s){
+  var n = parseFloat(String(s == null ? '' : s).replace(/['’\s]/g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+};
+
+var ICONS = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  chevron:'<path d="m9 6 6 6-6 6"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  tasks:'<rect x="3" y="3" width="18" height="18" rx="5"/><path d="m8 12 3 3 5-6"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c1.8.7 3 2.5 3.5 5.2"/>',
+  wallet:'<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M16 15h2"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'
+};
+var icon = function(n, s){
+  s = s || 24;
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICONS[n]+'</svg>';
+};
+
+/* ---------- Daten ---------- */
+var PHASES = ['12–9 Monate vorher','9–6 Monate vorher','6–3 Monate vorher','Letzter Monat'];
+var DEFAULT_TASKS = [
+  [0,'Budget festlegen'],[0,'Datum fixieren'],[0,'Gästeliste entwerfen'],[0,'Location besichtigen und buchen'],
+  [1,'Fotograf:in buchen'],[1,'Trauzeug:innen fragen'],[1,'Save-the-Date versenden'],[1,'Catering-Offerten vergleichen'],
+  [2,'Ringe aussuchen'],[2,'Einladungen gestalten und versenden'],[2,'Musik oder DJ buchen'],[2,'Outfit-Anprobe'],
+  [3,'Sitzplan erstellen'],[3,'Tagesablauf mit Location besprechen'],[3,'Offene Zusagen nachfassen']
+];
+var DEFAULT_CATS = ['Location und Catering','Fotografie','Outfit','Ringe','Musik / DJ','Blumen und Deko','Einladungen und Druck','Reserve'];
+var GROUPS = ['Familie','Freunde','Arbeit','Studium','Andere'];
+var STATUS = { yes:'Zugesagt', open:'Offen', no:'Abgesagt' };
+
+function fresh(){
+  return {
+    v:1, setup:false, a:'', b:'', date:'', place:'', budget:0,
+    tasks: DEFAULT_TASKS.map(function(t){ return {id:uid(), phase:PHASES[t[0]], title:t[1], due:'', done:false}; }),
+    guests: [],
+    cats: DEFAULT_CATS.map(function(n){ return {id:uid(), name:n, plan:0}; }),
+    expenses: []
+  };
+}
+var storageOk = true;
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){ return Object.assign(fresh(), JSON.parse(raw)); }
+  }catch(e){ storageOk = false; }
+  return fresh();
+}
+
+/* Modus: 'loading' (warte auf Verbindung), 'local' (nur dieses Gerät), 'shared' (gemeinsam per db) */
+var hasClaude = !!(window.claude && typeof window.claude.use === 'function');
+var local = load();
+var S = local;
+var mode = hasClaude ? 'loading' : 'local';
+var dbh = null, isOwner = false, readOnly = false, ready = false, waiting = '', failMsg = '';
+var shadow = { meta:'', tasks:{}, guests:{}, cats:{}, expenses:{} };
+var chains = {};
+var COLS = ['tasks','guests','cats','expenses'];
+var FIELDS = {
+  tasks:['title','phase','due','done','o'],
+  guests:['name','count','group','status','table','note','o'],
+  cats:['name','plan','o'],
+  expenses:['title','amount','cat','o']
+};
+function pack(c, it){
+  var out = {};
+  FIELDS[c].forEach(function(f){
+    var v = it[f];
+    if(v === undefined || v === null){
+      v = (f === 'done') ? false : (f === 'count') ? 1 : (f === 'plan' || f === 'amount' || f === 'o') ? 0 : '';
+    }
+    out[f] = v;
+  });
+  return out;
+}
+function metaOf(x){
+  return { a:x.a||'', b:x.b||'', date:x.date||'', place:x.place||'', budget:x.budget||0, setup:!!x.setup };
+}
+function byOrder(a, b){
+  var d = (a.o || 0) - (b.o || 0);
+  return d !== 0 ? d : (a.id < b.id ? -1 : 1);
+}
+
+function save(){
+  if(mode === 'local'){
+    try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+    catch(e){ storageOk = false; }
+    return;
+  }
+  if(mode !== 'shared' || !ready || readOnly || !dbh) return;
+  COLS.forEach(function(c){
+    var seen = {};
+    S[c].forEach(function(it){
+      seen[it.id] = 1;
+      var p = pack(c, it), str = JSON.stringify(p);
+      if(shadow[c][it.id] !== str){
+        shadow[c][it.id] = str;
+        write(c + '/' + it.id, function(){ return dbh.doc(c + '/' + it.id).set(p); });
+      }
+    });
+    Object.keys(shadow[c]).forEach(function(id){
+      if(!seen[id]){
+        delete shadow[c][id];
+        write(c + '/' + id, function(){ return dbh.doc(c + '/' + id).delete(); });
+      }
+    });
+  });
+  var mp = metaOf(S), ms = JSON.stringify(mp);
+  if(shadow.meta !== ms){
+    shadow.meta = ms;
+    write('meta/main', function(){ return dbh.doc('meta/main').set(mp); });
+  }
+}
+function write(path, fn){
+  var prev = chains[path] || Promise.resolve();
+  chains[path] = prev.then(fn).then(function(){
+    if(failMsg){ failMsg = ''; scheduleRender(); }
+  }).catch(handleWriteError);
+}
+function handleWriteError(e){
+  if(e && e.code === 'invalid_argument'){ readOnly = true; }
+  failMsg = readOnly ? '' : 'Eine Änderung konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.';
+  scheduleRender();
+}
+var rqTimer = null;
+function scheduleRender(){
+  if(rqTimer) return;
+  rqTimer = setTimeout(function(){ rqTimer = null; render(); }, 30);
+}
+
+/* ---------- Verbindung zur gemeinsamen Datenbank ---------- */
+function connect(){
+  var slow = setTimeout(function(){ if(!ready && mode !== 'local'){ waiting = 'slow'; scheduleRender(); } }, 12000);
+  Promise.resolve().then(function(){
+    return window.claude.use('db');
+  }).then(function(db){
+    if(!db){ return null; }
+    return Promise.resolve(window.claude.use('user')).catch(function(){ return null; }).then(function(user){
+      if(!user){ return {db:db, owner:false, canW:null}; }
+      return Promise.all([
+        user.isOwner().catch(function(){ return false; }),
+        user.can('data.write').catch(function(){ return null; })
+      ]).then(function(r){ return {db:db, owner:r[0], canW:r[1]}; });
+    });
+  }).catch(function(){ return null; }).then(function(info){
+    if(!info){
+      clearTimeout(slow);
+      mode = 'local'; S = local;
+      render();
+      if(!S.setup){ settingsSheet(true); }
+      return;
+    }
+    dbh = info.db; isOwner = !!info.owner; readOnly = (info.canW === false);
+    mode = 'shared';
+    S = { v:1, setup:true, a:'', b:'', date:'', place:'', budget:0, tasks:[], guests:[], cats:[], expenses:[] };
+    startSync(slow);
+  });
+}
+function startSync(slow){
+  var got = { meta:false, tasks:false, guests:false, cats:false, expenses:false };
+  var metaExists = false, metaDefinitive = false, seeded = false, firstSheetShown = false;
+  function onErr(e){
+    if(e && e.code === 'revoked'){ readOnly = true; }
+    failMsg = 'Die Verbindung zur gemeinsamen Planung wurde unterbrochen. Bitte lade die Seite neu.';
+    scheduleRender();
+  }
+  function tick(){
+    var all = got.meta && got.tasks && got.guests && got.cats && got.expenses;
+    if(!all) return;
+    if(!metaExists){
+      if(!metaDefinitive) return;
+      if(isOwner && !readOnly){
+        if(!seeded){ seeded = true; seed(); }
+      } else {
+        waiting = 'notstarted'; clearTimeout(slow); scheduleRender();
+      }
+      return;
+    }
+    clearTimeout(slow);
+    waiting = '';
+    if(!ready){ ready = true; }
+    scheduleRender();
+    if(!S.setup && !readOnly && !firstSheetShown && !sheet){
+      firstSheetShown = true;
+      setTimeout(function(){ if(!S.setup && !sheet) settingsSheet(true); }, 80);
+    }
+  }
+  dbh.doc('meta/main').onSnapshot(function(snap){
+    metaExists = snap.exists;
+    metaDefinitive = snap.exists || !snap.metadata.fromCache;
+    if(snap.exists){
+      var d = snap.data() || {};
+      S.a = d.a || ''; S.b = d.b || ''; S.date = d.date || ''; S.place = d.place || '';
+      S.budget = d.budget || 0; S.setup = !!d.setup;
+      shadow.meta = JSON.stringify(metaOf(S));
+    }
+    got.meta = true; tick();
+  }, onErr);
+  COLS.forEach(function(c){
+    dbh.collection(c).onSnapshot(function(snap){
+      var arr = snap.docs.map(function(d){ var o = Object.assign({}, d.data()); o.id = d.id; return o; });
+      arr.sort(byOrder);
+      S[c] = arr;
+      shadow[c] = {};
+      arr.forEach(function(o){ shadow[c][o.id] = JSON.stringify(pack(c, o)); });
+      got[c] = true; tick();
+    }, onErr);
+  });
+  function seed(){
+    var ops = [];
+    COLS.forEach(function(c){
+      (local[c] || []).forEach(function(it, i){
+        var o = Object.assign({}, it); if(o.o == null) o.o = i;
+        var p = pack(c, o);
+        ops.push(function(){ return dbh.doc(c + '/' + it.id).set(p); });
+      });
+    });
+    var i = 0;
+    function next(){
+      if(i >= ops.length){
+        return dbh.doc('meta/main').set(metaOf(local));
+      }
+      var batch = ops.slice(i, i + 5); i += 5;
+      return Promise.all(batch.map(function(f){ return f(); })).then(next);
+    }
+    next().catch(handleWriteError);
+  }
+}
+
+var ui = { tab:'home', taskFilter:'alle', guestTab:'alle', query:'' };
+
+/* ---------- Datum ---------- */
+function parseD(s){
+  if(!s) return null;
+  var p = s.split('-').map(Number);
+  return new Date(p[0], p[1]-1, p[2]);
+}
+function fmtD(s, opt){
+  var d = parseD(s);
+  return d ? d.toLocaleDateString('de-CH', opt || {day:'numeric', month:'long', year:'numeric'}) : '';
+}
+function daysTo(s){
+  var d = parseD(s);
+  if(!d) return null;
+  var t = new Date();
+  var t0 = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  return Math.round((d - t0) / 86400000);
+}
+
+/* ---------- Berechnungen ---------- */
+function spentOf(catId){
+  return S.expenses.filter(function(e){ return e.cat === catId; }).reduce(function(s,e){ return s + e.amount; }, 0);
+}
+function totalSpent(){ return S.expenses.reduce(function(s,e){ return s + e.amount; }, 0); }
+function persons(list){ return list.reduce(function(s,g){ return s + (g.count || 1); }, 0); }
+function catName(id){
+  var c = S.cats.filter(function(x){ return x.id === id; })[0];
+  return c ? c.name : 'Ohne Kategorie';
+}
+function initials(n){
+  return String(n).trim().split(/\s+/).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase() || '?';
+}
+function coupleTitle(){
+  if(S.a || S.b){
+    return esc(S.a || '…') + ' &amp; ' + esc(S.b || '…');
+  }
+  return 'Unsere Hochzeit';
+}
+
+/* ---------- Ansichten ---------- */
+function taskRow(t){
+  var meta = t.due ? 'bis ' + fmtD(t.due, {day:'numeric', month:'short'}) : '';
+  return '<div class="row">'
+    + '<label class="check"><input type="checkbox" data-c="task" data-id="'+t.id+'"'+(t.done?' checked':'')+' aria-label="Erledigt: '+esc(t.title)+'"></label>'
+    + '<button class="row-main" data-a="edit-task" data-id="'+t.id+'">'
+    + '<span class="row-title'+(t.done?' done':'')+'">'+esc(t.title)+'</span>'
+    + (meta ? '<span class="row-meta">'+esc(meta)+'</span>' : '')
+    + '</button></div>';
+}
+
+function viewHome(){
+  var days = daysTo(S.date), hero;
+  if(days === null){
+    hero = '<button class="hero hero-empty" data-a="settings"><span class="hero-label">Wann ist der grosse Tag?</span><span class="hero-cta">Datum festlegen</span></button>';
+  } else if(days > 0){
+    hero = '<section class="hero"><div><span class="hero-label">Noch</span><div class="hero-num"><b>'+days+'</b><span>'+(days===1?'Tag':'Tage')+'</span></div></div>'
+      + '<div class="hero-side">bis zum grossen Tag<br><b>'+esc(fmtD(S.date))+'</b></div></section>';
+  } else if(days === 0){
+    hero = '<section class="hero hero-empty"><span class="hero-label">Heute</span><span class="hero-cta">Es ist so weit. Alles Gute!</span></section>';
+  } else {
+    hero = '<section class="hero hero-empty"><span class="hero-label">Der grosse Tag war am '+esc(fmtD(S.date))+'</span><span class="hero-cta">Alles Gute zusammen!</span></section>';
+  }
+
+  var done = S.tasks.filter(function(t){ return t.done; }).length;
+  var spent = totalSpent();
+  var budgetTxt = S.budget > 0 ? Math.round(spent / S.budget * 100) + '<small> %</small>' : money(spent);
+  var yes = persons(S.guests.filter(function(g){ return g.status === 'yes'; }));
+  var all = persons(S.guests);
+
+  var open = S.tasks.filter(function(t){ return !t.done; });
+  var dated = open.filter(function(t){ return t.due; }).sort(function(a,b){ return a.due < b.due ? -1 : 1; });
+  var undated = open.filter(function(t){ return !t.due; });
+  var next = dated.concat(undated).slice(0,3);
+
+  return '<header class="hdr"><div><h1>'+coupleTitle()+'</h1>'
+    + ((S.date || S.place) ? '<div class="sub">'+esc([S.date ? fmtD(S.date) : '', S.place].filter(Boolean).join(' · '))+'</div>' : '')
+    + (mode === 'shared' ? '<div class="sub">Gemeinsame Planung, live synchronisiert</div>' : '')
+    + '</div><div class="hdr-actions"><button class="icon-btn" data-a="settings" aria-label="Einstellungen">'+icon('gear',20)+'</button></div></header>'
+    + hero
+    + '<div class="tiles">'
+    + '<button class="tile" data-a="tab" data-tab="tasks"><span>Aufgaben</span><b>'+done+'<small> / '+S.tasks.length+'</small></b></button>'
+    + '<button class="tile" data-a="tab" data-tab="budget"><span>'+(S.budget>0?'Budget genutzt':'Ausgegeben')+'</span><b>'+budgetTxt+'</b></button>'
+    + '<button class="tile" data-a="tab" data-tab="guests"><span>Zusagen</span><b>'+yes+'<small> / '+all+'</small></b></button>'
+    + '</div>'
+    + '<section><div class="sec-head"><h2>Als Nächstes</h2><button class="link-btn" data-a="tab" data-tab="tasks">Alle anzeigen</button></div>'
+    + (next.length ? '<div class="list">'+next.map(taskRow).join('')+'</div>'
+      : '<div class="list"><div class="empty">Alles erledigt. Füge eine neue Aufgabe hinzu, wenn etwas dazukommt.<button class="btn primary" data-a="add-task">Aufgabe hinzufügen</button></div></div>')
+    + '</section>';
+}
+
+function viewTasks(){
+  var done = S.tasks.filter(function(t){ return t.done; }).length;
+  var pct = S.tasks.length ? Math.round(done / S.tasks.length * 100) : 0;
+  var f = ui.taskFilter;
+  var chips = [['alle','Alle'],['offen','Offen'],['erledigt','Erledigt']].map(function(c){
+    return '<button class="chip" data-a="task-filter" data-v="'+c[0]+'" aria-pressed="'+(f===c[0])+'">'+c[1]+'</button>';
+  }).join('');
+
+  var phases = PHASES.slice();
+  S.tasks.forEach(function(t){ if(phases.indexOf(t.phase) < 0) phases.push(t.phase); });
+  var groups = phases.map(function(p){
+    var all = S.tasks.filter(function(t){ return t.phase === p; });
+    var shown = all.filter(function(t){ return f==='alle' || (f==='offen' ? !t.done : t.done); });
+    if(!shown.length) return '';
+    var d = all.filter(function(t){ return t.done; }).length;
+    return '<section><div class="sec-head"><h2>'+esc(p)+'</h2><span>'+d+'/'+all.length+'</span></div>'
+      + '<div class="list">'+shown.map(taskRow).join('')+'</div></section>';
+  }).join('');
+
+  return '<header class="hdr"><div><h1>Aufgaben</h1><div class="sub">'+done+' von '+S.tasks.length+' erledigt</div></div>'
+    + '<div class="hdr-actions"><button class="icon-btn primary" data-a="add-task" aria-label="Aufgabe hinzufügen">'+icon('plus',22)+'</button></div></header>'
+    + '<div class="bar" role="progressbar" aria-label="Fortschritt Aufgaben" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div>'
+    + '<div class="chips">'+chips+'</div>'
+    + (groups || '<div class="list"><div class="empty">In dieser Ansicht gibt es keine Aufgaben.</div></div>');
+}
+
+function guestListHTML(){
+  var q = ui.query.trim().toLowerCase();
+  var list = S.guests.filter(function(g){
+    return (ui.guestTab === 'alle' || g.status === ui.guestTab)
+      && (!q || (g.name + ' ' + g.group + ' ' + (g.note||'') + ' ' + (g.table||'')).toLowerCase().indexOf(q) >= 0);
+  });
+  if(!list.length){
+    if(!S.guests.length){
+      return '<div class="list"><div class="empty">Noch keine Gäste. Füge die erste Person oder Familie hinzu.<button class="btn primary" data-a="add-guest">Gast hinzufügen</button></div></div>';
+    }
+    return '<div class="list"><div class="empty">Keine Gäste gefunden.</div></div>';
+  }
+  return '<div class="list">' + list.map(function(g){
+    var n = g.count || 1;
+    var meta = [g.group, n + (n===1 ? ' Person' : ' Personen'), g.table ? 'Tisch ' + g.table : '', g.note].filter(Boolean).join(' · ');
+    return '<div class="row">'
+      + '<div class="avatar" aria-hidden="true">'+esc(initials(g.name))+'</div>'
+      + '<button class="row-main" data-a="edit-guest" data-id="'+g.id+'"><span class="row-title">'+esc(g.name)+'</span><span class="row-meta">'+esc(meta)+'</span></button>'
+      + '<button class="pill '+g.status+'" data-a="cycle-guest" data-id="'+g.id+'" aria-label="Status von '+esc(g.name)+': '+STATUS[g.status]+'. Tippen zum Ändern">'+STATUS[g.status]+'</button>'
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+function viewGuests(){
+  var by = function(s){ return persons(S.guests.filter(function(g){ return g.status === s; })); };
+  var tabs = [['alle','Alle',persons(S.guests)],['yes','Zugesagt',by('yes')],['open','Offen',by('open')],['no','Abgesagt',by('no')]]
+    .map(function(t){
+      return '<button data-a="guest-tab" data-v="'+t[0]+'" aria-pressed="'+(ui.guestTab===t[0])+'"><span>'+t[1]+'</span><small>'+t[2]+'</small></button>';
+    }).join('');
+  var tables = {};
+  S.guests.forEach(function(g){ if(g.table) tables[g.table] = 1; });
+  var nt = Object.keys(tables).length;
+  return '<header class="hdr"><div><h1>Gäste</h1><div class="sub">'+persons(S.guests)+' Personen'+(nt ? ' · '+nt+(nt===1?' Tisch':' Tische') : '')+'</div></div>'
+    + '<div class="hdr-actions"><button class="icon-btn primary" data-a="add-guest" aria-label="Gast hinzufügen">'+icon('plus',22)+'</button></div></header>'
+    + '<div class="search">'+icon('search',18)+'<label class="sr" for="q">Gäste suchen</label><input id="q" type="search" value="'+esc(ui.query)+'" placeholder="Name, Gruppe oder Tisch" autocomplete="off"></div>'
+    + '<div class="seg" role="group" aria-label="Status filtern">'+tabs+'</div>'
+    + '<div id="guestList">'+guestListHTML()+'</div>';
+}
+
+function viewBudget(){
+  var spent = totalSpent(), total = S.budget || 0, left = total - spent, hero;
+  if(total > 0){
+    var pct = Math.min(100, Math.round(spent / total * 100));
+    hero = '<section class="hero hero-col'+(left<0?' hero-warn':'')+'">'
+      + '<div><span class="hero-label">'+(left<0?'Über Budget':'Noch verfügbar')+'</span><div class="hero-big">'+money(Math.abs(left))+'</div></div>'
+      + '<div class="bar"><i style="width:'+pct+'%"></i></div>'
+      + '<div class="hero-stats"><div>Ausgegeben<b>'+money(spent)+'</b></div><div>Gesamtbudget<b>'+money(total)+'</b></div></div></section>';
+  } else {
+    hero = '<button class="hero hero-empty" data-a="settings"><span class="hero-label">Bisher ausgegeben: '+money(spent)+' CHF</span><span class="hero-cta">Gesamtbudget festlegen</span></button>';
+  }
+
+  var cats = S.cats.map(function(c){
+    var s = spentOf(c.id);
+    var over = c.plan > 0 && s > c.plan;
+    var pct = c.plan > 0 ? Math.min(100, Math.round(s / c.plan * 100)) : (s > 0 ? 100 : 0);
+    return '<button class="cat" data-a="edit-cat" data-id="'+c.id+'">'
+      + '<div class="cat-top"><span class="row-title">'+esc(c.name)+'</span><b>'+money(s)+'<small> / '+money(c.plan)+'</small></b></div>'
+      + '<div class="bar'+(over?' over':'')+'"><i style="width:'+pct+'%"></i></div>'
+      + (over ? '<span class="cat-note">'+money(s - c.plan)+' über Plan</span>' : (c.plan === 0 && s > 0 ? '<span class="row-meta">Noch kein Plan für diese Kategorie</span>' : ''))
+      + '</button>';
+  }).join('');
+  var loose = S.expenses.filter(function(e){ return !S.cats.some(function(c){ return c.id === e.cat; }); });
+  if(loose.length){
+    cats += '<div class="cat"><div class="cat-top"><span class="row-title">Ohne Kategorie</span><b>'+money(loose.reduce(function(s,e){return s+e.amount;},0))+'</b></div></div>';
+  }
+
+  var exps = S.expenses.slice().reverse().map(function(e){
+    return '<div class="row"><button class="row-main" data-a="edit-expense" data-id="'+e.id+'"><span class="row-title">'+esc(e.title)+'</span><span class="row-meta">'+esc(catName(e.cat))+'</span></button><span class="row-amt">'+money(e.amount)+'</span></div>';
+  }).join('');
+
+  return '<header class="hdr"><div><h1>Budget</h1><div class="sub">Alle Beträge in CHF</div></div>'
+    + '<div class="hdr-actions"><button class="icon-btn primary" data-a="add-expense" aria-label="Ausgabe erfassen">'+icon('plus',22)+'</button></div></header>'
+    + hero
+    + '<section><div class="sec-head"><h2>Kategorien</h2><span>ausgegeben / geplant</span></div>'
+    + '<div class="list">'+(cats || '<div class="empty">Noch keine Kategorien.</div>')+'</div>'
+    + '<button class="link-btn" data-a="add-cat">Kategorie hinzufügen</button></section>'
+    + '<section><div class="sec-head"><h2>Ausgaben</h2></div>'
+    + (exps ? '<div class="list">'+exps+'</div>'
+      : '<div class="list"><div class="empty">Noch keine Ausgaben erfasst.<button class="btn primary" data-a="add-expense">Ausgabe erfassen</button></div></div>')
+    + '</section>';
+}
+
+var VIEWS = { home:viewHome, tasks:viewTasks, guests:viewGuests, budget:viewBudget };
+var NAV = [['home','Übersicht','home'],['tasks','Aufgaben','tasks'],['guests','Gäste','users'],['budget','Budget','wallet']];
+
+function banner(){
+  var out = '';
+  if(mode === 'shared' && readOnly){
+    out += '<div class="notice">Du kannst die Planung ansehen, aber nicht ändern. Bitte den Besitzer, dich mit Bearbeitungsrecht einzuladen.</div>';
+  }
+  if(failMsg){ out += '<div class="notice" role="alert">'+esc(failMsg)+'</div>'; }
+  if(mode === 'local' && !storageOk){
+    out += '<div class="notice">Speichern ist in diesem Fenster nicht möglich. Änderungen gehen beim Schliessen verloren. Öffne die Seite direkt in Safari oder als App auf dem Home-Bildschirm.</div>';
+  }
+  return out;
+}
+function statusText(){
+  if(waiting === 'notstarted') return 'Die gemeinsame Planung ist noch nicht gestartet. Bitte den Besitzer, die Seite einmal zu öffnen.';
+  if(waiting === 'slow') return 'Die Verbindung dauert länger als üblich. Bitte lade die Seite neu.';
+  return 'Lade gemeinsame Planung …';
+}
+function bodyHTML(){
+  if(mode === 'loading' || (mode === 'shared' && !ready)){
+    return banner() + '<header class="hdr"><div><h1>Hochzeitsplaner</h1></div></header><div class="list"><div class="empty">'+esc(statusText())+'</div></div>';
+  }
+  return banner() + VIEWS[ui.tab]();
+}
+function render(keepScroll){
+  var main = $('#main');
+  var top = keepScroll === false ? 0 : main.scrollTop;
+  var act = document.activeElement;
+  var keepQ = !!(act && act.id === 'q' && !sheet);
+  var ss = keepQ ? act.selectionStart : 0, se = keepQ ? act.selectionEnd : 0;
+  main.innerHTML = bodyHTML();
+  main.scrollTop = top;
+  if(keepQ){
+    var q = $('#q');
+    if(q){ q.focus(); try{ q.setSelectionRange(ss, se); }catch(e){} }
+  }
+  $('#nav').innerHTML = NAV.map(function(n){
+    return '<button data-a="tab" data-tab="'+n[0]+'"'+(ui.tab===n[0]?' aria-current="page"':'')+'>'+icon(n[2])+n[1]+'</button>';
+  }).join('');
+}
+
+/* ---------- Bottom Sheet ---------- */
+var sheet = null;
+function fieldHTML(f){
+  var id = 'f_' + f.key, v = f.value == null ? '' : f.value, input;
+  if(f.type === 'select'){
+    input = '<select id="'+id+'">' + f.options.map(function(o){
+      return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(v)?' selected':'')+'>'+esc(o[1])+'</option>';
+    }).join('') + '</select>';
+  } else {
+    input = '<input id="'+id+'" type="'+(f.type||'text')+'" value="'+esc(v)+'"'
+      + (f.inputmode ? ' inputmode="'+f.inputmode+'"' : '')
+      + (f.placeholder ? ' placeholder="'+esc(f.placeholder)+'"' : '')
+      + ' autocomplete="off">';
+  }
+  return '<div class="field"><label for="'+id+'">'+esc(f.label)+'</label>'+input+'</div>';
+}
+function openSheet(cfg){
+  closeSheet(true);
+  var root = document.createElement('div');
+  root.className = 'sheet-root';
+  root.innerHTML = '<div class="sheet-backdrop" data-s="close"></div>'
+    + '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">'
+    + '<div class="sheet-head"><h2 id="sheetTitle">'+esc(cfg.title)+'</h2><button class="icon-btn" data-s="close" aria-label="Schliessen">'+icon('x',20)+'</button></div>'
+    + (cfg.intro ? '<p class="sheet-intro">'+esc(cfg.intro)+'</p>' : '')
+    + cfg.fields.map(fieldHTML).join('')
+    + '<p class="err" id="sheetErr" role="alert"></p>'
+    + '<div class="sheet-actions"><button class="btn primary block" data-s="save">'+esc(cfg.saveLabel || 'Speichern')+'</button>'
+    + (cfg.onDelete ? '<button class="btn danger block" data-s="delete">'+esc(cfg.deleteLabel || 'Löschen')+'</button>' : '')
+    + '</div></div>';
+  document.body.appendChild(root);
+  sheet = { root:root, cfg:cfg, prev:document.activeElement, armed:false };
+  var first = root.querySelector('input,select');
+  if(first && first.tagName === 'INPUT' && !first.value){ setTimeout(function(){ try{ first.focus(); }catch(e){} }, 60); }
+}
+function closeSheet(silent){
+  if(!sheet) return;
+  var s = sheet; sheet = null;
+  s.root.remove();
+  if(!silent){
+    if(s.cfg.onClose) s.cfg.onClose();
+    try{ if(s.prev && s.prev.focus && document.contains(s.prev)) s.prev.focus(); }catch(e){}
+  }
+}
+function collect(){
+  var out = {};
+  sheet.cfg.fields.forEach(function(f){ out[f.key] = document.getElementById('f_'+f.key).value; });
+  return out;
+}
+function sheetAction(kind){
+  if(!sheet) return;
+  var cfg = sheet.cfg, err = $('#sheetErr');
+  if(kind === 'close'){ closeSheet(); return; }
+  if(kind === 'save'){
+    var msg = cfg.onSave(collect());
+    if(msg){ err.textContent = msg; return; }
+    closeSheet(true); save(); render();
+    return;
+  }
+  if(kind === 'delete'){
+    var btn = sheet.root.querySelector('[data-s="delete"]');
+    if(!sheet.armed){ sheet.armed = true; btn.textContent = 'Wirklich? Nochmal tippen zum Löschen'; return; }
+    cfg.onDelete();
+    closeSheet(true); save(); render();
+  }
+}
+
+/* ---------- Formulare ---------- */
+function find(list, id){ return list.filter(function(x){ return x.id === id; })[0]; }
+var GONE = 'Dieser Eintrag wurde inzwischen gelöscht.';
+
+function taskSheet(id){
+  var t = id ? find(S.tasks, id) : null;
+  var isNew = !id;
+  if(id && !t) return;
+  openSheet({
+    title: isNew ? 'Aufgabe hinzufügen' : 'Aufgabe bearbeiten',
+    fields: [
+      {key:'title', label:'Aufgabe', value:t && t.title, placeholder:'z. B. Trauredner:in anfragen'},
+      {key:'phase', label:'Zeitraum', type:'select', value:t ? t.phase : PHASES[0], options:PHASES.map(function(p){ return [p,p]; })},
+      {key:'due', label:'Fällig am (optional)', type:'date', value:t && t.due}
+    ],
+    onSave: function(v){
+      if(!v.title.trim()) return 'Bitte gib einen Titel ein.';
+      if(isNew){ S.tasks.push({id:uid(), o:Date.now(), done:false, title:v.title.trim(), phase:v.phase, due:v.due}); return; }
+      var cur = find(S.tasks, id);
+      if(!cur) return GONE;
+      cur.title = v.title.trim(); cur.phase = v.phase; cur.due = v.due;
+    },
+    onDelete: isNew ? null : function(){ S.tasks = S.tasks.filter(function(x){ return x.id !== id; }); }
+  });
+}
+function guestSheet(id){
+  var g = id ? find(S.guests, id) : null;
+  var isNew = !id;
+  if(id && !g) return;
+  openSheet({
+    title: isNew ? 'Gast hinzufügen' : 'Gast bearbeiten',
+    fields: [
+      {key:'name', label:'Name', value:g && g.name, placeholder:'Person oder Familie'},
+      {key:'count', label:'Anzahl Personen', value:g ? g.count : 1, inputmode:'numeric'},
+      {key:'group', label:'Gruppe', type:'select', value:g ? g.group : GROUPS[0], options:GROUPS.map(function(x){ return [x,x]; })},
+      {key:'status', label:'Status', type:'select', value:g ? g.status : 'open', options:[['open','Offen'],['yes','Zugesagt'],['no','Abgesagt']]},
+      {key:'table', label:'Tisch (optional)', value:g && g.table, placeholder:'z. B. 3'},
+      {key:'note', label:'Hinweis (optional)', value:g && g.note, placeholder:'z. B. vegetarisch'}
+    ],
+    onSave: function(v){
+      if(!v.name.trim()) return 'Bitte gib einen Namen ein.';
+      var c = Math.max(1, Math.round(num(v.count)) || 1);
+      var data = {name:v.name.trim(), count:c, group:v.group, status:v.status, table:v.table.trim(), note:v.note.trim()};
+      if(isNew){ data.id = uid(); data.o = Date.now(); S.guests.push(data); return; }
+      var cur = find(S.guests, id);
+      if(!cur) return GONE;
+      Object.assign(cur, data);
+    },
+    onDelete: isNew ? null : function(){ S.guests = S.guests.filter(function(x){ return x.id !== id; }); }
+  });
+}
+function catSheet(id){
+  var c = id ? find(S.cats, id) : null;
+  var isNew = !id;
+  if(id && !c) return;
+  openSheet({
+    title: isNew ? 'Kategorie hinzufügen' : 'Kategorie bearbeiten',
+    fields: [
+      {key:'name', label:'Name', value:c && c.name, placeholder:'z. B. Hochzeitstorte'},
+      {key:'plan', label:'Geplanter Betrag (CHF)', value:c ? c.plan : '', inputmode:'decimal', placeholder:'0'}
+    ],
+    onSave: function(v){
+      if(!v.name.trim()) return 'Bitte gib einen Namen ein.';
+      var p = Math.max(0, num(v.plan));
+      if(isNew){ S.cats.push({id:uid(), o:Date.now(), name:v.name.trim(), plan:p}); return; }
+      var cur = find(S.cats, id);
+      if(!cur) return GONE;
+      cur.name = v.name.trim(); cur.plan = p;
+    },
+    deleteLabel: 'Kategorie löschen',
+    onDelete: isNew ? null : function(){
+      S.cats = S.cats.filter(function(x){ return x.id !== id; });
+      S.expenses.forEach(function(e){ if(e.cat === id) e.cat = ''; });
+    }
+  });
+}
+function expenseSheet(id){
+  var e = id ? find(S.expenses, id) : null;
+  var isNew = !id;
+  if(id && !e) return;
+  var opts = S.cats.map(function(c){ return [c.id, c.name]; }).concat([['', 'Ohne Kategorie']]);
+  openSheet({
+    title: isNew ? 'Ausgabe erfassen' : 'Ausgabe bearbeiten',
+    fields: [
+      {key:'title', label:'Wofür?', value:e && e.title, placeholder:'z. B. Anzahlung Location'},
+      {key:'amount', label:'Betrag (CHF)', value:e ? e.amount : '', inputmode:'decimal', placeholder:'0'},
+      {key:'cat', label:'Kategorie', type:'select', value:e ? e.cat : (S.cats[0] ? S.cats[0].id : ''), options:opts}
+    ],
+    onSave: function(v){
+      var a = num(v.amount);
+      if(!v.title.trim()) return 'Bitte beschreibe kurz, wofür die Ausgabe war.';
+      if(!(a > 0)) return 'Bitte gib einen Betrag grösser als 0 ein.';
+      if(isNew){ S.expenses.push({id:uid(), o:Date.now(), title:v.title.trim(), amount:a, cat:v.cat}); return; }
+      var cur = find(S.expenses, id);
+      if(!cur) return GONE;
+      cur.title = v.title.trim(); cur.amount = a; cur.cat = v.cat;
+    },
+    onDelete: isNew ? null : function(){ S.expenses = S.expenses.filter(function(x){ return x.id !== id; }); }
+  });
+}
+function settingsSheet(first){
+  var shared = mode === 'shared';
+  openSheet({
+    title: first ? 'Willkommen' : 'Einstellungen',
+    intro: first ? 'Trag ein paar Eckdaten ein. Du kannst alles später ändern.' : (shared ? 'Änderungen sehen alle, die diese Planung nutzen.' : ''),
+    saveLabel: first ? 'Los geht’s' : 'Speichern',
+    fields: [
+      {key:'a', label:'Name 1', value:S.a, placeholder:'Vorname'},
+      {key:'b', label:'Name 2', value:S.b, placeholder:'Vorname'},
+      {key:'date', label:'Hochzeitsdatum', type:'date', value:S.date},
+      {key:'place', label:'Ort', value:S.place, placeholder:'z. B. Schloss, Stadt'},
+      {key:'budget', label:'Gesamtbudget (CHF)', value:S.budget || '', inputmode:'decimal', placeholder:'0'}
+    ],
+    onSave: function(v){
+      S.a = v.a.trim(); S.b = v.b.trim(); S.date = v.date; S.place = v.place.trim();
+      S.budget = Math.max(0, num(v.budget)); S.setup = true;
+    },
+    onClose: first ? function(){ S.setup = true; save(); } : null,
+    deleteLabel: 'Alle Daten zurücksetzen',
+    onDelete: (first || shared) ? null : function(){ S = fresh(); local = S; S.setup = true; ui.tab = 'home'; }
+  });
+}
+
+/* ---------- Events ---------- */
+var MUTATING = {'settings':1,'add-task':1,'edit-task':1,'add-guest':1,'edit-guest':1,'cycle-guest':1,'add-cat':1,'edit-cat':1,'add-expense':1,'edit-expense':1};
+function locked(){ return mode === 'shared' && readOnly; }
+
+document.addEventListener('click', function(ev){
+  var s = ev.target.closest('[data-s]');
+  if(s){ sheetAction(s.dataset.s); return; }
+  var el = ev.target.closest('[data-a]');
+  if(!el) return;
+  var a = el.dataset.a, id = el.dataset.id;
+  if(MUTATING[a] && locked()) return;
+  if(a === 'tab'){ ui.tab = el.dataset.tab; render(false); }
+  else if(a === 'settings'){ settingsSheet(false); }
+  else if(a === 'add-task'){ taskSheet(null); }
+  else if(a === 'edit-task'){ taskSheet(id); }
+  else if(a === 'task-filter'){ ui.taskFilter = el.dataset.v; render(); }
+  else if(a === 'add-guest'){ guestSheet(null); }
+  else if(a === 'edit-guest'){ guestSheet(id); }
+  else if(a === 'guest-tab'){ ui.guestTab = el.dataset.v; render(); }
+  else if(a === 'cycle-guest'){
+    var g = find(S.guests, id), order = ['open','yes','no'];
+    if(!g) return;
+    g.status = order[(order.indexOf(g.status) + 1) % 3];
+    save(); render();
+  }
+  else if(a === 'add-cat'){ catSheet(null); }
+  else if(a === 'edit-cat'){ catSheet(id); }
+  else if(a === 'add-expense'){ expenseSheet(null); }
+  else if(a === 'edit-expense'){ expenseSheet(id); }
+});
+document.addEventListener('change', function(ev){
+  var el = ev.target.closest('[data-c="task"]');
+  if(!el) return;
+  if(locked()){ render(); return; }
+  var t = find(S.tasks, el.dataset.id);
+  if(t){ t.done = el.checked; save(); render(); }
+});
+document.addEventListener('input', function(ev){
+  if(ev.target && ev.target.id === 'q'){
+    ui.query = ev.target.value;
+    $('#guestList').innerHTML = guestListHTML();
+  }
+});
+document.addEventListener('keydown', function(ev){
+  if(ev.key === 'Escape' && sheet){ sheetAction('close'); }
+});
+
+render();
+if(mode === 'local'){
+  if(!S.setup){ settingsSheet(true); }
+} else {
+  connect();
+}
+})();
+</script>
+</body>
+</html>
